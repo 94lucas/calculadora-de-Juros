@@ -11,6 +11,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,12 +29,20 @@ import app.calculodejuros.components.CaixaDeEntrada
 import app.calculodejuros.components.CardResultado
 
 @Composable
-fun JurosScreen() {
-    var capital by remember { mutableStateOf("") }
-    var taxa by remember { mutableStateOf("") }
-    var tempo by remember { mutableStateOf("") }
-    var juros by remember { mutableStateOf(0.0) }
-    var montante by remember { mutableStateOf(0.0) }
+fun JurosScreen(jurosScreenViewModel: JurosScreenViewModel) {
+
+    //var capital by remember { mutableStateOf("") }- crimos uma variavel que vai observar o capital da viewModel
+    val capital by jurosScreenViewModel.capitalState.observeAsState(initial = "")
+
+    //var taxa by remember { mutableStateOf("") }
+    val taxa by jurosScreenViewModel.taxaState.observeAsState(initial = "")
+    //var tempo by remember { mutableStateOf("") }
+    val tempo by jurosScreenViewModel.tempoState.observeAsState("")
+
+   // var juros by remember { mutableStateOf(0.0) }
+    val juros by jurosScreenViewModel.jurosState.observeAsState(initial = 0.0)
+    //var montante by remember { mutableStateOf(0.0) }
+    val montante by jurosScreenViewModel.montanteState.observeAsState(initial = 0.0)
 
     Box(
         modifier = Modifier.padding(16.dp),
@@ -87,7 +96,7 @@ fun JurosScreen() {
                             .padding(top = 16.dp),
                         //Percebemos que o atualizar valor é uma função
                         atualizarValor = {
-                            capital = it
+                            jurosScreenViewModel.onCapitalChanged(novoCapital = it)
                         }
                     )
                     //Taxa
@@ -117,7 +126,7 @@ fun JurosScreen() {
                             .fillMaxWidth()
                             .padding(top = 16.dp),
                         atualizarValor = {
-                            taxa = it
+                            jurosScreenViewModel.onTaxaChanged(novoTaxa = it)
                         }
                     )
                     //tempo
@@ -147,20 +156,13 @@ fun JurosScreen() {
                             .fillMaxWidth()
                             .padding(top = 16.dp),
                         atualizarValor = {
-                            tempo = it
+                            jurosScreenViewModel.onTempoChanged(novoTempo = it)
                         }
                     )
                     Button(
                         onClick = {
-                            juros = calcularJuros(
-                                capital = capital.toDouble(),
-                                taxa = taxa.toDouble(),
-                                tempo = tempo.toDouble()
-                            )
-                            montante = calcularMontante(
-                                capital = capital.toDouble(),
-                                juros = juros
-                            )
+                            jurosScreenViewModel.calcularJurosViewModel()
+                            jurosScreenViewModel.calcularMontanteViewModel()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
